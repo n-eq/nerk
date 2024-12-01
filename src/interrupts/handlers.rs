@@ -17,6 +17,17 @@ extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: InterruptStackFram
     println!("EXCEPTION: DIVIDE BY ZERO\n{stack_frame:#?}");
 }
 
+extern "x86-interrupt" fn page_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: x86_64::structures::idt::PageFaultErrorCode,
+) {
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:?}", x86_64::registers::control::Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("{:#?}", stack_frame);
+    x86_64::instructions::hlt();
+}
+
 extern "x86-interrupt" fn double_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: u64,
@@ -28,6 +39,7 @@ extern "x86-interrupt" fn double_fault_handler(
 pub(crate) fn define_handlers(idt: &mut x86_64::structures::idt::InterruptDescriptorTable) {
     idt.breakpoint.set_handler_fn(breakpoint_handler);
     idt.divide_error.set_handler_fn(divide_by_zero_handler);
+    idt.page_fault.set_handler_fn(page_fault_handler);
     unsafe {
         idt.double_fault
             .set_handler_fn(double_fault_handler)
