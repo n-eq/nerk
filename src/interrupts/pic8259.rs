@@ -18,5 +18,11 @@ pub enum InterruptIndex {
     Unused4,
 }
 
+impl InterruptIndex {
+    pub fn as_u8(self) -> u8 {
+        self as u8
+    }
+}
+
 pub(crate) static PICS: spin::Mutex<ChainedPics> =
     spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });

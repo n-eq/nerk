@@ -21,8 +21,9 @@ extern "x86-interrupt" fn page_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: x86_64::structures::idt::PageFaultErrorCode,
 ) {
+    use x86_64::registers::control::Cr2;
     println!("EXCEPTION: PAGE FAULT");
-    println!("Accessed Address: {:?}", x86_64::registers::control::Cr2::read());
+    println!("Accessed Address: {:?}", Cr2::read());
     println!("Error Code: {:?}", error_code);
     println!("{:#?}", stack_frame);
     x86_64::instructions::hlt();
@@ -45,7 +46,7 @@ pub(crate) fn define_handlers(idt: &mut x86_64::structures::idt::InterruptDescri
             .set_handler_fn(double_fault_handler)
             .set_stack_index(super::gdt::DOUBLE_FAULT_IST_INDEX);
     }
-    idt[super::pic8259::InterruptIndex::Timer as usize].set_handler_fn(timer_interrupt_handler);
-    idt[super::pic8259::InterruptIndex::Keyboard as usize]
+    idt[super::pic8259::InterruptIndex::Timer.as_u8()].set_handler_fn(timer_interrupt_handler);
+    idt[super::pic8259::InterruptIndex::Keyboard.as_u8()]
         .set_handler_fn(crate::keyboard::keyboard_interrupt_handler);
 }
